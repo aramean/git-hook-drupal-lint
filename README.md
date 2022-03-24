@@ -1,4 +1,5 @@
 # git-hook-drupal-lints
+Prevents git push when lints aren't passing tests.
 
 ### Install on your GIT project
 ```shell
