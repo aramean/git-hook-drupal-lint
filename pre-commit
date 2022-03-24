@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+NC="\033[0m"
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+YELLOW="\033[1;33m"
+
+WARN_ICON="⚠️"
+ERROR_ICON="❌"
+OK_ICON="✅"
+
+function __run() #(step, name, cmd)
+{
+    local color output exitcode
+
+    printf "${YELLOW}[%s]${NC} %-20s" "$1" "$2"
+    output=$(eval "$3" 2>&1)
+    exitcode=$?
+
+    if [[ 0 == $exitcode || 130 == $exitcode ]]; then
+        echo -e "${GREEN}OK${NC} ${OK_ICON}"
+    else
+        echo -e "${RED}ERROR${NC} ${ERROR_ICON}\n\n$output"
+        exit 1
+    fi
+}
+
+MODIFIED="git diff --diff-filter=M --name-only --cached | grep \".php$\""
+IGNORE="resources/lang,resources/views,bootstrap/helpers,database/migrations,bin,.md,*.css,*.js,*.txt"
+PHP="php"
+PHPCS="vendor/bin/phpcs"
+PHPSTAN="vendor/bin/phpstan"
+
+#TODO: Move Ruleset
+if [ -x ${PHPCS} ]; then
+    CODESTD="vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"
+    PHPCS=${PHPCS}
+else
+    #CODESTD="PSR2"
+    CODESTD="../wk-drupal-app/src/vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"
+    PHPCS="phpcs"
+fi;
+
+__run "1/3" "php lint" "${MODIFIED} | xargs -r ${PHP} -l"
+__run "2/3" "code sniffer" "${MODIFIED} | xargs -r ${PHPCS} --report=code --colors --report-width=80 --standard=${CODESTD} --ignore=${IGNORE}"
+__run "3/3" "phpstan" "${MODIFIED} | xargs -r ${PHPSTAN} analyse"
