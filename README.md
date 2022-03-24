@@ -23,7 +23,7 @@ git commit
 
 #### .git/hooks/pre-commit
 ```shell
-# PHP
+# PHP Lint
 PHP_BIN=1
 
 # Code Sniffer
