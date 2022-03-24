@@ -1,4 +1,4 @@
-# git-hook-drupal-lint
+# git-hook-drupal-lints
 
 ### Install on your GIT project
 ```shell
